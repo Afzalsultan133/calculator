@@ -1,45 +1,78 @@
 import inquirer from "inquirer";
-async function askQuestion() {
-    await inquirer.prompt([
-        {
-            type: 'list',
-            name: 'action',
-            message: 'What would you like to do?',
-            choices: ['Addition', 'Subtraction', 'Multiplication', 'Division']
-        }, {
-            type: 'number',
-            name: 'num1',
-            message: 'Enter first number'
-        }, {
-            type: 'number',
-            name: 'num2',
-            message: 'Enter second number'
+async function ATM() {
+    const maxAttempts = 5; // Set the maximum number of attempts
+    let attempts = 0;
+    let isValidUser = false;
+    let remainingBalance = 1000; // Assuming an initial balance of 1000, you can set this to any value
+    while (!isValidUser && attempts < maxAttempts) {
+        const answer = await inquirer.prompt([
+            {
+                type: "input",
+                name: "UserID",
+                message: "Please enter your User ID"
+            },
+            {
+                type: "number",
+                name: "Password",
+                message: "Enter your password"
+            }
+        ]);
+        const validUserId = 123;
+        const validPassword = 789;
+        if (Number(answer.UserID) === validUserId && answer.Password === validPassword) {
+            isValidUser = true;
+            console.log("You can proceed");
         }
-    ]).then((answer) => {
-        if (answer.action == 'Addition') {
-            console.log(`${answer.num1}+${answer.num2}=${answer.num1 + answer.num2}`);
+        else {
+            attempts++;
+            console.log(`Invalid User ID or Password. Please try again. Attempt ${attempts}/${maxAttempts}`);
         }
-        else if (answer.action === 'Subtraction') {
-            console.log(`${answer.num1}-${answer.num2}=${answer.num1 - answer.num2}`);
+    }
+    if (isValidUser) {
+        // Once a valid user is identified, proceed with the rest of the prompts
+        const transactionDetails = await inquirer.prompt([
+            {
+                type: "list",
+                name: "accountType",
+                message: "Choose an account type",
+                choices: ["Current", "Savings"]
+            },
+            {
+                type: "list",
+                name: "transaction",
+                message: "Select a transaction",
+                choices: ["Fast cash", "Withdraw"]
+            },
+            {
+                type: "number",
+                name: "amount",
+                message: "Enter your amount",
+                default: Math.floor(Math.random()) // Generates a random amount between 1 and 500
+            }
+        ]);
+        const transactionAmount = transactionDetails.amount;
+        if (transactionAmount > remainingBalance) {
+            console.log("Insufficient balance. Transaction cannot be completed.");
         }
-        else if (answer.action === "Multiplication") {
-            console.log(`${answer.num1}*${answer.num2}=${answer.num1 * answer.num2}`);
+        else {
+            remainingBalance -= transactionAmount;
+            console.log("Transaction successful!");
+            console.log("Remaining balance:", remainingBalance);
         }
-        else if (answer.action == 'Division') {
-            console.log(`${answer.num1}/${answer.num2}=${answer.num1 / answer.num2}`);
-        }
-    });
+    }
+    else {
+        console.log("Exceeded maximum attempts. Exiting the program.");
+    }
 }
-//askQuestion()
 async function startAgain() {
     do {
-        await askQuestion();
-        var answer = await inquirer.prompt({
+        await ATM();
+        var again = await inquirer.prompt({
             type: 'input',
-            name: 'restart',
-            message: "Do you want to perform another operation?(yes/no)"
+            name: 'continue',
+            message: `Do you want to continue? (yes/no)`
         });
-    } while (answer.restart == 'Y' || answer.restart == 'y');
+    } while (again.continue == 'y' || again.continue == 'Y');
     {
     }
 }
